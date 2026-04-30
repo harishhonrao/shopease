@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ShopEase — Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Lora:ital,wght@0,500;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="css/style.css"/>
+<link rel="stylesheet" href="css/admin.css"/>
+</head>
+<body class="admin-body">
+
+<!-- ========== LOGIN SCREEN ========== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-circle">🔐</div>
+      <h1>Shop<span>Ease</span> Admin</h1>
+      <p>Sign in to manage your store</p>
+    </div>
+    <div class="login-form">
+      <div class="l-field">
+        <label>Username</label>
+        <input type="text" id="loginUser" placeholder="admin" autocomplete="username"/>
+      </div>
+      <div class="l-field">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="admin123" autocomplete="current-password"/>
+      </div>
+      <div class="login-error" id="loginError"></div>
+      <button class="btn-login" onclick="handleLogin()">Sign In</button>
+      <p class="login-hint">Default: <strong>admin</strong> / <strong>admin123</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ADMIN DASHBOARD ========== -->
+<div class="admin-app" id="adminApp" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-header">
+      <div class="sb-brand">Shop<span>Ease</span></div>
+      <div class="sb-badge">Admin</div>
+    </div>
+    <nav class="sb-nav">
+      <button class="sb-link active" data-page="dashboard" onclick="switchPage('dashboard',this)">
+        <span class="sb-icon">📊</span> Dashboard
+      </button>
+      <button class="sb-link" data-page="products" onclick="switchPage('products',this)">
+        <span class="sb-icon">📦</span> Products
+      </button>
+      <button class="sb-link" data-page="orders" onclick="switchPage('orders',this)">
+        <span class="sb-icon">🧾</span> Orders
+      </button>
+      <button class="sb-link" data-page="settings" onclick="switchPage('settings',this)">
+        <span class="sb-icon">⚙️</span> Settings
+      </button>
+    </nav>
+    <div class="sb-footer">
+      <a href="index.html" class="sb-link store-link"><span class="sb-icon">🏪</span> View Store</a>
+      <button class="sb-link" onclick="handleLogout()"><span class="sb-icon">🚪</span> Logout</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="admin-main">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <h2 class="page-title" id="pageTitle">Dashboard</h2>
+      <div class="topbar-right">
+        <span class="admin-name">👤 Admin</span>
+      </div>
+    </div>
+
+    <!-- ===== DASHBOARD PAGE ===== -->
+    <div class="page-content active" id="page-dashboard">
+      <div class="stat-cards">
+        <div class="s-card">
+          <div class="s-icon" style="background:#e8f0eb;color:#2d5a3d">📦</div>
+          <div class="s-info">
+            <div class="s-num" id="dTotal">0</div>
+            <div class="s-label">Total Products</div>
+          </div>
+        </div>
+        <div class="s-card">
+          <div class="s-icon" style="background:#fef3ec;color:#d4763a">🧾</div>
+          <div class="s-info">
+            <div class="s-num" id="dOrders">0</div>
+            <div class="s-label">Total Orders</div>
+          </div>
+        </div>
+        <div class="s-card">
+          <div class="s-icon" style="background:#eef0fb;color:#4a5ac7">💰</div>
+          <div class="s-info">
+            <div class="s-num" id="dRevenue">₹0</div>
+            <div class="s-label">Total Revenue</div>
+          </div>
+        </div>
+        <div class="s-card">
+          <div class="s-icon" style="background:#fce8e8;color:#c74a4a">🏷️</div>
+          <div class="s-info">
+            <div class="s-num" id="dCategories">0</div>
+            <div class="s-label">Categories</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="dash-card">
+          <h3>Recent Orders</h3>
+          <div id="recentOrders" class="dash-table-wrap"></div>
+        </div>
+        <div class="dash-card">
+          <h3>Low Stock Alert</h3>
+          <div id="lowStock" class="dash-table-wrap"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PRODUCTS PAGE ===== -->
+    <div class="page-content" id="page-products">
+      <div class="page-actions">
+        <div class="search-bar">
+          <input type="text" id="prodSearch" placeholder="Search products..." oninput="renderAdminProducts()"/>
+        </div>
+        <select id="prodCatFilter" onchange="renderAdminProducts()">
+          <option value="">All Categories</option>
+        </select>
+        <button class="btn-primary" onclick="openProductModal()">+ Add Product</button>
+      </div>
+      <div class="table-wrap">
+        <table class="admin-table" id="productsTable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Price (₹)</th>
+              <th>Old Price</th>
+              <th>Stock</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="prodTbody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer" id="prodFooter"></div>
+    </div>
+
+    <!-- ===== ORDERS PAGE ===== -->
+    <div class="page-content" id="page-orders">
+      <div class="page-actions">
+        <div class="search-bar">
+          <input type="text" id="orderSearch" placeholder="Search orders by ID or customer..." oninput="renderOrders()"/>
+        </div>
+        <select id="orderStatusFilter" onchange="renderOrders()">
+          <option value="">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="Shipped">Shipped</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+        <button class="btn-outline-admin" onclick="clearAllOrders()">Clear All Orders</button>
+      </div>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total (₹)</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="orderTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS PAGE ===== -->
+    <div class="page-content" id="page-settings">
+      <div class="settings-grid">
+        <div class="settings-card">
+          <h3>Store Settings</h3>
+          <div class="s-field">
+            <label>Store Name</label>
+            <input type="text" id="setStoreName" value="ShopEase"/>
+          </div>
+          <div class="s-field">
+            <label>Store Currency</label>
+            <select id="setCurrency">
+              <option value="₹" selected>₹ INR — Indian Rupee</option>
+              <option value="$">$ USD — US Dollar</option>
+              <option value="€">€ EUR — Euro</option>
+              <option value="£">£ GBP — British Pound</option>
+            </select>
+          </div>
+          <div class="s-field">
+            <label>Free Shipping Threshold (₹)</label>
+            <input type="number" id="setFreeShip" value="999"/>
+          </div>
+          <div class="s-field">
+            <label>Shipping Fee (₹)</label>
+            <input type="number" id="setShipFee" value="99"/>
+          </div>
+          <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
+        </div>
+
+        <div class="settings-card">
+          <h3>Admin Account</h3>
+          <div class="s-field">
+            <label>Username</label>
+            <input type="text" id="setUser" value="admin"/>
+          </div>
+          <div class="s-field">
+            <label>New Password</label>
+            <input type="password" id="setPass" placeholder="Enter new password"/>
+          </div>
+          <div class="s-field">
+            <label>Confirm Password</label>
+            <input type="password" id="setPassConfirm" placeholder="Confirm new password"/>
+          </div>
+          <button class="btn-primary" onclick="updateCredentials()">Update Credentials</button>
+        </div>
+
+        <div class="settings-card">
+          <h3>Data Management</h3>
+          <p style="color:var(--text3);font-size:.85rem;margin-bottom:1rem">Manage your store data stored in browser localStorage.</p>
+          <button class="btn-outline-admin" onclick="exportData()">📤 Export All Data (JSON)</button>
+          <br/><br/>
+          <button class="btn-danger-admin" onclick="resetAllData()">🗑️ Reset Everything to Default</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ========== ADD/EDIT PRODUCT MODAL ========== -->
+<div class="modal-overlay" id="prodModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="prodModalTitle">Add New Product</h3>
+      <button class="close-btn" onclick="closeProductModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-row">
+        <div class="m-field full">
+          <label>Product Name *</label>
+          <input type="text" id="mName" placeholder="e.g. Wireless Earbuds"/>
+        </div>
+      </div>
+      <div class="m-row">
+        <div class="m-field">
+          <label>Category *</label>
+          <select id="mCat">
+            <option value="">Select category</option>
+            <option>Electronics</option>
+            <option>Clothing</option>
+            <option>Home</option>
+            <option>Footwear</option>
+            <option>Accessories</option>
+            <option>Stationery</option>
+            <option>Beauty</option>
+            <option>Fitness</option>
+            <option>Books</option>
+            <option>Food</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="m-field">
+          <label>Emoji Icon *</label>
+          <input type="text" id="mEmoji" placeholder="🎧" maxlength="4"/>
+        </div>
+      </div>
+      <div class="m-row">
+        <div class="m-field">
+          <label>Price (₹) *</label>
+          <input type="number" id="mPrice" placeholder="1499" min="1"/>
+        </div>
+        <div class="m-field">
+          <label>Old Price (₹)</label>
+          <input type="number" id="mOldPrice" placeholder="2499 (leave empty if no discount)"/>
+        </div>
+      </div>
+      <div class="m-row">
+        <div class="m-field">
+          <label>Stock Quantity</label>
+          <input type="number" id="mStock" placeholder="50" min="0" value="50"/>
+        </div>
+        <div class="m-field">
+          <label>Tag / Badge</label>
+          <select id="mTag">
+            <option value="">None</option>
+            <option>Sale</option>
+            <option>Popular</option>
+            <option>Trending</option>
+            <option>New</option>
+            <option>Limited</option>
+          </select>
+        </div>
+      </div>
+      <div class="m-row">
+        <div class="m-field full">
+          <label>Description</label>
+          <textarea id="mDesc" placeholder="Short product description..." rows="3"></textarea>
+        </div>
+      </div>
+      <div class="m-row">
+        <div class="m-field">
+          <label>Status</label>
+          <select id="mStatus">
+            <option value="active">Active</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline-admin" onclick="closeProductModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ORDER DETAIL MODAL ========== -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="orderModalTitle">Order Details</h3>
+      <button class="close-btn" onclick="closeOrderModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="orderModalBody"></div>
+    <div class="modal-foot">
+      <button class="btn-outline-admin" onclick="closeOrderModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="js/admin.js"></script>
+</body>
+</html>
